@@ -114,14 +114,6 @@ TORRENT_TYPES = {
 }
 
 
-class ConfigAction(argparse.Action):
-    """A configuration file action."""
-    def __call__(self, parser, namespace, values, option_string=None):
-        config = SafeConfigParser()
-        config.read(values)
-        setattr(namespace, self.dest, config.items('Defaults'))
-
-
 def setup_logging(**kwargs):
     """
     Setup logging.
@@ -140,13 +132,20 @@ def main():
                     "in a \"Defaults\" section.")
     
     parser.add_argument('-c', '--config_file', metavar='FILE',
-                        action=ConfigAction,
                         help="Configuration file.")
     
     args, remaining_argv = parser.parse_known_args()
     
     if args.config_file is not None:
-        parser.set_defaults(**args.config_file)
+        config = SafeConfigParser()
+        config.read(args.config_file)
+        defaults = dict(config.items('Defaults'))
+    else:
+        defaults = {
+            'destination_dir': SCRIPT_DIR,
+        }
+    
+    parser.set_defaults(**defaults)
     
     parser.add_argument('torrent_name',
                         help="The torrent's name.")
@@ -159,7 +158,6 @@ def main():
                         help="The torrent's label.")
     
     parser.add_argument('--destination_dir',
-                        default=SCRIPT_DIR,
                         help="Destination directory.")
     
     parser.add_argument('--log_filename',
