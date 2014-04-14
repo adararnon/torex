@@ -56,14 +56,16 @@ class AbstractTorrent(object):
         logger.debug('Specific download_dir: %s', self._subdir)
     
     @property
-    def dest_folder(self):
+    def full_dest_path(self):
         return os.path.join(self.dest_dir, self.LABEL_DIR, self._subdir)
     
     def extract(self):
         """Performs the actual extraction."""
         with rarfile.RarFile(self._rar_path) as rf:
             files_to_extract = self._get_files_to_extract(rf.namelist())
-            rf.extractall(self.dest_folder, files_to_extract)
+            
+            logger.info('Extracting to: %s', self.full_dest_path)
+            rf.extractall(self.full_dest_path, files_to_extract)
     
     @staticmethod
     def _find_rar_file(dir_path):
