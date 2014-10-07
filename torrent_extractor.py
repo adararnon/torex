@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # Directories etc.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILENAME = os.path.join(SCRIPT_DIR, r'log.txt')
+LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s %(message)s'
 CONFIG_FILENAME = os.path.join(SCRIPT_DIR, 'config.ini')
 CONFIG_SECTION = 'torrent_extractor'
 
@@ -173,7 +174,7 @@ def main():
     args = parser.parse_args(remaining_argv)
     
     # Initialize logging
-    setup_logging(filename=args.log_filename, level=args.log_level)
+    setup_logging(filename=args.log_filename, level=args.log_level, format=LOG_FORMAT)
     
     # Create a torrent instance and extract it
     try:
