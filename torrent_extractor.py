@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILENAME = os.path.join(SCRIPT_DIR, r'log.txt')
 LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s %(message)s'
-CONFIG_FILENAME = os.path.join(SCRIPT_DIR, 'config.ini')
-CONFIG_SECTION = 'torrent_extractor'
+DEFAULT_CONFIG_FILENAME = os.path.join(SCRIPT_DIR, 'config.ini')
 
 
 class UnsupportedTorrentError(Exception):
@@ -134,12 +133,13 @@ def main():
                     "Default command-line options may be set using a configuration file,\n" \
                     "in a \"Defaults\" section.")
     
-    parser.add_argument('-c', '--config_file', metavar='FILE',
+    parser.add_argument('-c', '--config_file', metavar='CONFIG_FILE',
+                        default=DEFAULT_CONFIG_FILENAME,
                         help="Configuration file.")
     
     args, remaining_argv = parser.parse_known_args()
     
-    if args.config_file is not None:
+    if args.config_file and os.path.isfile(args.config_file):
         config = SafeConfigParser()
         config.read(args.config_file)
         defaults = dict(config.items('Defaults'))
