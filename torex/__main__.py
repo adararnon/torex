@@ -5,13 +5,9 @@ import fnmatch
 import re
 import logging
 import traceback
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
+import rarfile
 
-try:
-    import rarfile
-except ImportError:
-    print >>sys.stderr, "You need rarfile package in order to run this script"
-    sys.exit(1)
 
 # The logger
 logger = logging.getLogger(__name__)
@@ -23,7 +19,7 @@ LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s %(message)s'
 DEFAULT_CONFIG_FILENAME = os.path.join(SCRIPT_DIR, 'config.ini')
 
 
-class UnsupportedTorrentError(Exception):
+class UnsupportedTorrentError(RuntimeError):
     """An exception thrown when the torrent is unsupported."""
     pass
 
@@ -119,33 +115,41 @@ TORRENT_TYPES = {
 def setup_logging(**kwargs):
     """
     Setup logging.
+    :param kwargs: Logging parameters
     :see: :mod:`logging`
     """
     logging.basicConfig(**kwargs)
 
 
-def main():
+def has_config_file(args):
+    return args.config_file and os.path.isfile(args.config_file)
+
+
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     # Parse arguments
     parser = argparse.ArgumentParser(
-        description="Extract a torrent to a central destination directory.\n" \
-                    "The torrent should be exactly one RAR archive (possibly split to multiple files).\n" \
-                    "Support for different types of torrents will be added in the future.\n" \
-                    "Default command-line options may be set using a configuration file,\n" \
+        description="Extract a torrent to a central destination directory.\n"
+                    "The torrent should be exactly one RAR archive (possibly split to multiple files).\n"
+                    "Support for different types of torrents will be added in the future.\n"
+                    "Default command-line options may be set using a configuration file,\n"
                     "in a \"Defaults\" section.")
     
     parser.add_argument('-c', '--config_file', metavar='CONFIG_FILE',
                         default=DEFAULT_CONFIG_FILENAME,
                         help="Configuration file.")
     
-    args, remaining_argv = parser.parse_known_args()
+    args, remaining_argv = parser.parse_known_args(args)
     
-    if args.config_file and os.path.isfile(args.config_file):
-        config = SafeConfigParser()
+    if has_config_file(args):
+        config = ConfigParser()
         config.read(args.config_file)
         defaults = dict(config.items('Defaults'))
     else:
         defaults = {
-            'destination_dir': SCRIPT_DIR,
+            'destination_dir': '.',
         }
     
     parser.set_defaults(**defaults)
@@ -175,14 +179,20 @@ def main():
     
     # Initialize logging
     setup_logging(filename=args.log_filename, level=args.log_level, format=LOG_FORMAT)
+    if has_config_file(args):
+        logger.debug('Running WITH a config file')
+    else:
+        logger.debug('Running WITHOUT a config file')
     
     # Create a torrent instance and extract it
+    # noinspection PyBroadException
     try:
-        logger.info('Handling torrent: %s (%s), directory: %s', args.torrent_name, args.label, args.torrent_download_dir)
+        logger.info('Handling torrent: %s (%s), directory: %s',
+                    args.torrent_name, args.label, args.torrent_download_dir)
         torrent = TORRENT_TYPES[args.label](args.destination_dir, args.torrent_name, args.torrent_download_dir)
         torrent.extract()
-        logger.info('Done! (%s)', args.torrent_name)
-    except:
+        logger.info('Done: %s', args.torrent_name)
+    except Exception:
         traceback.print_exc()
         logger.exception('Exception occurred while handling torrent')
     

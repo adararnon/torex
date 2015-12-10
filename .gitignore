@@ -1,1 +1,7 @@
+# Python
+*.py[oc]
+*.egg-info/
+__pycache__/
+
+# Script files
 log.txt
