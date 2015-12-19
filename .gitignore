@@ -3,5 +3,9 @@
 *.egg-info/
 __pycache__/
 
+# setup.py
+/build/
+/dist/
+
 # Script files
 log.txt

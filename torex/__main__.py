@@ -7,16 +7,15 @@ import sys
 import traceback
 from configparser import ConfigParser
 
+import pkg_resources
 import rarfile
 
 # The logger
 logger = logging.getLogger(__name__)
 
 # Directories etc.
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_FILENAME = os.path.join(SCRIPT_DIR, r'log.txt')
+LOG_FILENAME = os.path.expanduser(os.path.join('~', '.torex', 'log.txt'))
 LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s %(message)s'
-DEFAULT_CONFIG_FILENAME = os.path.join(SCRIPT_DIR, 'config.ini')
 
 
 class UnsupportedTorrentError(RuntimeError):
@@ -118,16 +117,13 @@ def setup_logging(**kwargs):
     :param kwargs: Logging parameters
     :see: :mod:`logging`
     """
+    os.makedirs(os.path.dirname(kwargs['filename']), exist_ok=True)
     logging.basicConfig(**kwargs)
 
 
-def has_config_file(args):
-    return args.config_file and os.path.isfile(args.config_file)
-
-
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
 
     # Parse arguments
     parser = argparse.ArgumentParser(
@@ -137,20 +133,9 @@ def main(args=None):
                         "Default command-line options may be set using a configuration file,\n"
                         "in a \"Defaults\" section.")
 
-    parser.add_argument('-c', '--config_file', metavar='CONFIG_FILE',
-                        default=DEFAULT_CONFIG_FILENAME,
-                        help="Configuration file.")
-
-    args, remaining_argv = parser.parse_known_args(args)
-
-    if has_config_file(args):
-        config = ConfigParser()
-        config.read(args.config_file)
-        defaults = dict(config.items('Defaults'))
-    else:
-        defaults = {
-            'destination_dir': '.',
-        }
+    config = ConfigParser()
+    config.read_string(pkg_resources.resource_string(__name__, 'config.ini').decode('utf-8'))
+    defaults = dict(config.items('Defaults'))
 
     parser.set_defaults(**defaults)
 
@@ -175,14 +160,11 @@ def main(args=None):
                         default=logging.DEBUG,
                         help="Log level.")
 
-    args = parser.parse_args(remaining_argv)
+    args = parser.parse_args(argv)
 
     # Initialize logging
     setup_logging(filename=args.log_filename, level=args.log_level, format=LOG_FORMAT)
-    if has_config_file(args):
-        logger.debug('Running WITH a config file')
-    else:
-        logger.debug('Running WITHOUT a config file')
+    logger.debug('Started, destination dir: %s', args.destination_dir)
 
     # Create a torrent instance and extract it
     # noinspection PyBroadException

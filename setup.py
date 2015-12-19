@@ -1,3 +1,5 @@
+import os
+
 from setuptools import setup
 
 setup(
@@ -14,5 +16,6 @@ setup(
             'console_scripts': [
                 'torex = torex.__main__:main'
             ]
-        }
+        },
+        data_files=[('torex', [os.path.join('torex', 'config.ini')])],
 )
