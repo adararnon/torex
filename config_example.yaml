@@ -1,0 +1,5 @@
+tv:
+  path: 'C:\Media\TV'
+  special:
+    - title: 'Breaking.*'
+      path: 'D:\Media\TV'

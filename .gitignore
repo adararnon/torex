@@ -2,10 +2,11 @@
 *.py[oc]
 *.egg-info/
 __pycache__/
+.cache/
 
 # setup.py
 /build/
 /dist/
 
-# Script files
-log.txt
+# Configuration
+*.yaml

@@ -1,4 +1,4 @@
-torrent-extractor
-=================
+# torex
 
-Allows automatic extraction of torrents to a central directory.
+Application for automatic torrent extraction.
+The interface is designed with uTorrent in mind.
