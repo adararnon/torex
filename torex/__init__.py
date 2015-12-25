@@ -11,7 +11,7 @@ from torex.torrents.tv import TvTorrent
 logger = logging.getLogger(__name__)
 
 # Version
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 # Directories etc.
 LOG_FILENAME = os.path.expanduser(os.path.join('~', '.torex', 'log.txt'))
