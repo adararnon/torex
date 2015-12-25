@@ -6,12 +6,10 @@ from setuptools import setup
 # noinspection PyPep8Naming
 from setuptools.command.test import test as TestCommand
 
-
 here = os.path.abspath(os.path.dirname(__file__))
 
 
 class PyTest(TestCommand):
-
     # noinspection PyAttributeOutsideInit
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -39,20 +37,19 @@ def get_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-def get_long_description():
-    return read('README.md')
-
+version = get_version('torex', '__init__.py')
+long_description = read('README.md')
 
 setup(
         name='torex',
-        version=get_version('torex', '__init__.py'),
-        url='',
+        version=version,
         license='GPL',
         author='Adar Arnon',
-        author_email='',
+        author_email='adararnon@gmail.com',
         description='Torrent extraction automation',
-        long_description=get_long_description(),
-        download_url='https://github.com/adararnon/torex',
+        long_description=long_description,
+        url='https://github.com/adararnon/torex',
+        download_url='https://github.com/adararnon/torex/tarball/{0}'.format(version),
         keywords=['torrent', 'extraction'],
         classifiers=[],
         packages=['torex'],
