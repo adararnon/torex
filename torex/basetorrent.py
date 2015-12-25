@@ -5,9 +5,10 @@ import os
 import re
 
 import rarfile
-import yaml
 
 from torex.exceptions import UnsupportedTorrentException
+from torex.utils.config import read_config
+from torex.utils.naming import get_torrent_title
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +26,12 @@ class Torrent(object):
     extensions = []  # List of supported extensions
 
     def __init__(self, args):
-        self.config = self._read_config(args)
-        self.title = args.title
-        self.download_dir = args.download_dir
-        self.dst = self._decide_dst(self.config[self.label], self.title)
+        self.config = read_config(args.config_path)
+        self.torrent_path = args.torrent_path
+        self.title = get_torrent_title(self.torrent_path)
+        self.dst = self._calc_dst(self.config[self.label], self.title)
 
-        self._rar_path = self._find_rar_file(self.download_dir)
+        self._rar_path = self._find_rar_file(self.torrent_path)
 
         logger.debug('Destination: %s', self.dst)
         logger.debug('RAR path: %s', self._rar_path)
@@ -59,7 +60,7 @@ class Torrent(object):
 
     # noinspection PyMethodParameters
     @abc.abstractclassmethod
-    def get_common_title(cls, title):
+    def _get_common_title(cls, title):
         """
         Get the torrent's common title.
         For example, this should be the movie's or the series' title.
@@ -73,12 +74,7 @@ class Torrent(object):
         return [x for x in name_list if os.path.splitext(x)[1] in cls.extensions]
 
     @classmethod
-    def _read_config(cls, args):
-        with open(args.config_path, 'r') as configf:
-            return yaml.load(configf)
-
-    @classmethod
-    def _decide_dst(cls, label_config, title):
+    def _calc_dst(cls, label_config, title):
         dst = label_config['path']
         # If there are specific configurations, check if we match
         if 'specific' in label_config:
@@ -86,4 +82,4 @@ class Torrent(object):
                 if re.compile(special['title']).match(title):
                     dst = special['path']
 
-        return os.path.join(dst, cls.get_common_title(title))
+        return os.path.join(dst, cls._get_common_title(title))

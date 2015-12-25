@@ -14,3 +14,8 @@ class UnsupportedTorrentException(TorexException):
 class InvalidConfigurationException(TorexException):
     """Raised when the configuration file is invalid."""
     pass
+
+
+class InvalidSeriesTitleException(TorexException):
+    """Raised when a TV torrent has a name that could not be parsed into the series' title."""
+    pass

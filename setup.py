@@ -48,15 +48,18 @@ setup(
         version=get_version('torex', '__init__.py'),
         url='',
         license='GPL',
-        author='Adar',
+        author='Adar Arnon',
         author_email='',
         description='Torrent extraction automation',
         long_description=get_long_description(),
+        download_url='https://github.com/adararnon/torex',
+        keywords=['torrent', 'extraction'],
+        classifiers=[],
         packages=['torex'],
         data_files=[('torex', [os.path.join('torex', 'config.ini')])],
         entry_points={
             'console_scripts': [
-                'torex = torex.__main__:main'
+                'torex = torex:main'
             ]
         },
         install_requires=['rarfile'],

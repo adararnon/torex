@@ -43,10 +43,7 @@ def create_parser():
                         type=existingfile,
                         help="Configuration YAML file.")
 
-    parser.add_argument('title',
-                        help="The torrent's title.")
-
-    parser.add_argument('download_dir',
+    parser.add_argument('torrent_path',
                         help="The torrent's directory.")
 
     parser.add_argument('label', metavar='label',
@@ -74,16 +71,16 @@ def main(argv=None):
 
     # Initialize logging
     setup_logging(filename=args.log_filename, level=args.log_level, format=LOG_FORMAT)
-    logger.debug('Started, destination dir: %s', args.destination_dir)
 
     # Create a torrent instance and extract it
     # noinspection PyBroadException
     try:
-        logger.info('Handling torrent: %s (%s), directory: %s',
-                    args.torrent_name, args.label, args.torrent_download_dir)
+        logger.info('Running with configuration: %s', args.config_path)
+        logger.info('Handling torrent: %s (%s)',
+                    args.label, args.torrent_path)
         torrent = torrent_dict[args.label](args)
         torrent.extract()
-        logger.info('Done: %s', args.torrent_name)
+        logger.info('Done: %s', torrent.title)
     except Exception:
         traceback.print_exc()
         logger.exception('Exception occurred while handling torrent')
